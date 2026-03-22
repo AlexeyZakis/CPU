@@ -1,7 +1,7 @@
 import cpu_defs::*;
 
 module next_pc_mux (
-    input wire [ADDR_W-1:0] pc_plus_4,
+    input wire [ADDR_W-1:0] pc_plus_byte_offset,
     input wire [ADDR_W-1:0] branch_target,
     input wire [ADDR_W-1:0] jump_target,
     input wire take_branch,
@@ -12,6 +12,6 @@ module next_pc_mux (
                         ? jump_target
                         : take_branch
                             ? branch_target
-                            : pc_plus_4;
+                            : pc_plus_byte_offset;
 endmodule
 

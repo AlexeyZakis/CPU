@@ -12,7 +12,7 @@ module core_singlecycle (
 );
     wire [ADDR_W-1:0] pc;
     wire [ADDR_W-1:0] next_pc;
-    wire [ADDR_W-1:0] pc_plus_4;
+    wire [ADDR_W-1:0] pc_plus_byte_offset;
     wire [DATA_W-1:0] instruction;
 
     wire [ISA_OPC_W-1:0] opcode;
@@ -47,7 +47,7 @@ module core_singlecycle (
 
     assign instruction = imem_data;
     assign imem_addr = pc;
-    assign pc_plus_4 = pc + WORD_BYTES;
+    assign pc_plus_byte_offset = pc + WORD_BYTES;
     assign alu_in2 = alu_src ? imm_ext : rt_data;
     assign dmem_addr = alu_out;
     assign dmem_wdata = rt_data;
@@ -114,7 +114,7 @@ module core_singlecycle (
     );
 
     branch_unit u_branch (
-        .pc_plus_4(pc_plus_4),
+        .pc_plus_byte_offset(pc_plus_byte_offset),
         .imm_ext(imm_ext),
         .branch(branch),
         .zero(zero),
@@ -123,7 +123,7 @@ module core_singlecycle (
     );
 
     next_pc_mux u_next_pc_mux (
-        .pc_plus_4(pc_plus_4),
+        .pc_plus_byte_offset(pc_plus_byte_offset),
         .branch_target(branch_target),
         .jump_target(jump_target),
         .take_branch(take_branch),
