@@ -30,9 +30,9 @@ module regfile (
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             for (i = 0; i < REG_COUNT; i = i + 1) begin
-                regs[i] <= {DATA_W{1'b0}};
+                regs[i] <= 0;
             end
-        end else if (we && (waddr != {REG_ADDR_W{1'b0}})) begin
+        end else if (we && (waddr != 0)) begin
             regs[waddr] <= wdata;
         end
     end

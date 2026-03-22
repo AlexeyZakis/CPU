@@ -1,8 +1,8 @@
 import cpu_defs::*;
 
 module control_unit (
-    input wire [5:0] opcode,
-    input wire [5:0] funct,
+    input wire [ISA_OPC_W-1:0] opcode,
+    input wire [ISA_FUNCT_W-1:0] funct,
     output reg reg_write,
     output reg mem_write,
     output reg mem_to_reg,

@@ -15,14 +15,14 @@ module core_singlecycle (
     wire [ADDR_W-1:0] pc_plus_4;
     wire [DATA_W-1:0] instruction;
 
-    wire [5:0] opcode;
-    wire [4:0] rs;
-    wire [4:0] rt;
-    wire [4:0] rd;
-    wire [4:0] shamt;
-    wire [5:0] funct;
-    wire [15:0] imm;
-    wire [25:0] jaddr;
+    wire [ISA_OPC_W-1:0] opcode;
+    wire [ISA_REG_W-1:0] rs;
+    wire [ISA_REG_W-1:0] rt;
+    wire [ISA_REG_W-1:0] rd;
+    wire [ISA_SHAMT_W-1:0] shamt;
+    wire [ISA_FUNCT_W-1:0] funct;
+    wire [ISA_IMM_W-1:0] imm;
+    wire [ISA_JADDR_W-1:0] jaddr;
 
     wire reg_write;
     wire mem_write;
@@ -47,13 +47,13 @@ module core_singlecycle (
 
     assign instruction = imem_data;
     assign imem_addr = pc;
-    assign pc_plus_4 = pc + 4;
+    assign pc_plus_4 = pc + WORD_BYTES;
     assign alu_in2 = alu_src ? imm_ext : rt_data;
     assign dmem_addr = alu_out;
     assign dmem_wdata = rt_data;
     assign dmem_we = mem_write;
     assign write_reg = reg_dst ? rd[REG_ADDR_W-1:0] : rt[REG_ADDR_W-1:0];
-    assign jump_target = {{(ADDR_W-28){1'b0}}, jaddr, 2'b00};
+    assign jump_target = {{(ADDR_W - ISA_JADDR_W - BYTE_OFFSET_W){1'b0}}, jaddr, {BYTE_OFFSET_W{1'b0}}};
 
     pc_reg u_pc_reg (
         .clk(clk),

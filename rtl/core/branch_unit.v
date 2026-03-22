@@ -8,7 +8,7 @@ module branch_unit (
     output wire take_branch,
     output wire [ADDR_W-1:0] branch_target
 );
-    assign take_branch  = branch & zero;
-    assign branch_target = pc_plus_4 + (imm_ext << 2);
+    assign take_branch = branch & zero;
+    assign branch_target = pc_plus_4 + (imm_ext << BYTE_OFFSET_W);
 endmodule
 

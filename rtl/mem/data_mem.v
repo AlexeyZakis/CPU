@@ -23,13 +23,13 @@ module data_mem (
     
     integer i;
 
-    assign word_addr = addr[DMEM_ADDR_W+1:2];
+    assign word_addr = addr[DMEM_ADDR_W + BYTE_OFFSET_W - 1 : BYTE_OFFSET_W];
     assign od = mem[word_addr];
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             for (i = 0; i < DMEM_DEPTH; i = i + 1) begin
-                mem[i] <= {DATA_W{1'b0}};
+                mem[i] <= 0;
             end
         end else if (w) begin
             mem[word_addr] <= id;

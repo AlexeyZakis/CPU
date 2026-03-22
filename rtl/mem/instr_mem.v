@@ -1,34 +1,36 @@
 import cpu_defs::*;
 
-module instr_mem (
-    input  wire [ADDR_W-1:0] addr,
-    output wire [DATA_W-1:0] com
-);
-    reg [DATA_W-1:0] mem [0:IMEM_DEPTH-1];
+import cpu_defs::*;
 
-    function [DATA_W-1:0] enc_r;
-        input [4:0] rs;
-        input [4:0] rt;
-        input [4:0] rd;
-        input [5:0] funct;
+module instr_mem (
+    input  wire [ADDR_W-1:0]  addr,
+    output wire [INSTR_W-1:0] com
+);
+    reg [INSTR_W-1:0] mem [0:IMEM_DEPTH-1];
+
+    function [INSTR_W-1:0] enc_r;
+        input [ISA_REG_W-1:0]   rs;
+        input [ISA_REG_W-1:0]   rt;
+        input [ISA_REG_W-1:0]   rd;
+        input [ISA_FUNCT_W-1:0] funct;
         begin
-            enc_r = {OPC_RTYPE, rs, rt, rd, 5'd0, funct};
+            enc_r = {OPC_RTYPE, rs, rt, rd, {ISA_SHAMT_W{1'b0}}, funct};
         end
     endfunction
 
-    function [DATA_W-1:0] enc_i;
-        input [5:0] opcode;
-        input [4:0] rs;
-        input [4:0] rt;
-        input [15:0] imm;
+    function [INSTR_W-1:0] enc_i;
+        input [ISA_OPC_W-1:0] opcode;
+        input [ISA_REG_W-1:0] rs;
+        input [ISA_REG_W-1:0] rt;
+        input [ISA_IMM_W-1:0] imm;
         begin
             enc_i = {opcode, rs, rt, imm};
         end
     endfunction
 
-    function [DATA_W-1:0] enc_j;
-        input [5:0] opcode;
-        input [25:0] jaddr;
+    function [INSTR_W-1:0] enc_j;
+        input [ISA_OPC_W-1:0] opcode;
+        input [ISA_JADDR_W-1:0] jaddr;
         begin
             enc_j = {opcode, jaddr};
         end
@@ -37,7 +39,7 @@ module instr_mem (
     integer i;
     initial begin
         for (i = 0; i < IMEM_DEPTH; i = i + 1) begin
-            mem[i] = {DATA_W{1'b0}};
+            mem[i] = 0;
         end
 
         // 0:  addi r1, r0, 5       ; r1 = 5
@@ -64,6 +66,6 @@ module instr_mem (
         mem[10] = enc_r(5'd4, 5'd1, 5'd7, FUNCT_ADD);
     end
 
-    assign com = mem[addr[IMEM_ADDR_W+1:2]];
+    assign com = mem[addr[IMEM_ADDR_W + BYTE_OFFSET_W - 1 : BYTE_OFFSET_W]];
 endmodule
 

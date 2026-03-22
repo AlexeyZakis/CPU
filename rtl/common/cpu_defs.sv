@@ -3,6 +3,11 @@ package cpu_defs;
 localparam DATA_W = 32;
 localparam ADDR_W = 32;
 
+localparam INSTR_W = 32;
+localparam IMM_W = 16;
+
+localparam BYTE_W = 8;
+
 localparam REG_COUNT = 8;
 
 localparam DMEM_DEPTH = 8;
@@ -24,6 +29,39 @@ localparam FUNCT_AND = 6'b100100;
 localparam FUNCT_OR = 6'b100101;
 localparam FUNCT_SLT = 6'b101010;
 
+// ISA field widths
+localparam ISA_OPC_W = 6;
+localparam ISA_REG_W = 5;
+localparam ISA_SHAMT_W = 5;
+localparam ISA_FUNCT_W = 6;
+localparam ISA_IMM_W = 16;
+localparam ISA_JADDR_W = 26;
+
+ // MIPS-like instruction field bit positions
+localparam OPC_MSB = 31;
+localparam OPC_LSB = 26;
+
+localparam RS_MSB = 25;
+localparam RS_LSB = 21;
+
+localparam RT_MSB = 20;
+localparam RT_LSB = 16;
+
+localparam RD_MSB = 15;
+localparam RD_LSB = 11;
+
+localparam SHAMT_MSB = 10;
+localparam SHAMT_LSB = 6;
+
+localparam FUNCT_MSB = 5;
+localparam FUNCT_LSB = 0;
+
+localparam IMM_MSB = 15;
+localparam IMM_LSB = 0;
+
+localparam JADDR_MSB = 25;
+localparam JADDR_LSB = 0;
+
 // ALU control
 localparam ALU_OP_W = 4;
 
@@ -35,10 +73,13 @@ localparam ALU_OR = 4;
 localparam ALU_SLT = 5;
 
 
-// Address widths
-parameter REG_ADDR_W = $clog2(REG_COUNT);
-parameter DMEM_ADDR_W = $clog2(DMEM_DEPTH);
-parameter IMEM_ADDR_W = $clog2(IMEM_DEPTH);
+// Pre-calculated constants
+localparam REG_ADDR_W = $clog2(REG_COUNT);
+localparam DMEM_ADDR_W = $clog2(DMEM_DEPTH);
+localparam IMEM_ADDR_W = $clog2(IMEM_DEPTH);
+
+localparam WORD_BYTES = DATA_W / BYTE_W;
+localparam BYTE_OFFSET_W = $clog2(WORD_BYTES);
 
 endpackage
 

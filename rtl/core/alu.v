@@ -13,13 +13,11 @@ module alu (
             ALU_SUB: out = in1 - in2;
             ALU_AND: out = in1 & in2;
             ALU_OR : out = in1 | in2;
-            ALU_SLT: out = ($signed(in1) < $signed(in2))
-                                ? {{(DATA_W-1){1'b0}}, 1'b1}
-                                : {DATA_W{1'b0}};
-            default : out = {DATA_W{1'b0}};
+            ALU_SLT: out = ($signed(in1) < $signed(in2)) ? 1 : 0;
+            default : out = 0;
         endcase
     end
 
-    assign zero = (out == {DATA_W{1'b0}});
+    assign zero = (out == 0);
 endmodule
 

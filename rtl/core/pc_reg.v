@@ -9,7 +9,7 @@ module pc_reg (
 );
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            pc_out <= {ADDR_W{1'b0}};
+            pc_out <= 0;
         end else if (store) begin
             pc_out <= pc_in;
         end
