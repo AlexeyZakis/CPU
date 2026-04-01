@@ -15,7 +15,6 @@ module regfile (
     integer i;
     
     // DEBUG
-    wire [DATA_W-1:0] dbg_reg0 = regs[0];
     wire [DATA_W-1:0] dbg_reg1 = regs[1];
     wire [DATA_W-1:0] dbg_reg2 = regs[2];
     wire [DATA_W-1:0] dbg_reg3 = regs[3];
@@ -24,8 +23,8 @@ module regfile (
     wire [DATA_W-1:0] dbg_reg6 = regs[6];
     wire [DATA_W-1:0] dbg_reg7 = regs[7];
 
-    assign rdata1 = regs[raddr1];
-    assign rdata2 = regs[raddr2];
+    assign rdata1 = (we && (waddr != 0) && (waddr == raddr1)) ? wdata : regs[raddr1];
+    assign rdata2 = (we && (waddr != 0) && (waddr == raddr2)) ? wdata : regs[raddr2];
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin

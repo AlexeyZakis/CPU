@@ -11,29 +11,29 @@ module cpu (
     wire [DATA_W-1:0] dmem_rdata;
     wire dmem_we;
 
-    core_singlecycle u_core_singlecycle (
+    core_pipeline u_core_pipeline (
         .clk(clk),
         .rst(rst),
-        .imem_data(imem_data),
         .imem_addr(imem_addr),
-        .dmem_rdata(dmem_rdata),
+        .imem_data(imem_data),
+        .dmem_we(dmem_we),
         .dmem_addr(dmem_addr),
         .dmem_wdata(dmem_wdata),
-        .dmem_we(dmem_we)
+        .dmem_rdata(dmem_rdata)
     );
 
     instr_mem u_instr_mem (
         .addr(imem_addr),
-        .com(imem_data)
+        .rdata(imem_data)
     );
 
     data_mem u_data_mem (
         .clk(clk),
         .rst(rst),
         .addr(dmem_addr),
-        .id(dmem_wdata),
-        .w(dmem_we),
-        .od(dmem_rdata)
+        .wdata(dmem_wdata),
+        .we(dmem_we),
+        .rdata(dmem_rdata)
     );
 endmodule
 

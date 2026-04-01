@@ -4,13 +4,8 @@ SIMULATOR = gtkwave
 OUTPUT = cpu_sim
 DUMP_FILE = dump.vcd
 
-SOURCES = \
-rtl/common/cpu_defs.sv \
-$(wildcard rtl/*.v) \
-$(wildcard rtl/core/*.v) \
-$(wildcard rtl/mem/*.v) \
-$(wildcard tb/*.v)
-
+SOURCES = rtl/common/cpu_defs.sv \
+          $(shell find rtl tb -type f \( -name "*.v" -o -name "*.sv" \) ! -path "rtl/common/cpu_defs.sv")
 run:
 	$(VERILOG_COMPILER) -g2012 -I rtl/common $(SOURCES) -o $(OUTPUT)
 	./$(OUTPUT)

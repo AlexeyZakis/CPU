@@ -4,9 +4,9 @@ module data_mem (
     input wire clk,
     input wire rst,
     input wire [ADDR_W-1:0] addr,
-    input wire [DATA_W-1:0] id,
-    input wire w,
-    output wire [DATA_W-1:0] od
+    input wire [DATA_W-1:0] wdata,
+    input wire we,
+    output wire [DATA_W-1:0] rdata
 );
     reg [DATA_W-1:0] mem [0:DMEM_DEPTH-1];
     wire [DMEM_ADDR_W-1:0] word_addr;
@@ -24,15 +24,15 @@ module data_mem (
     integer i;
 
     assign word_addr = addr[DMEM_ADDR_W + BYTE_OFFSET_W - 1 : BYTE_OFFSET_W];
-    assign od = mem[word_addr];
+    assign rdata = mem[word_addr];
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             for (i = 0; i < DMEM_DEPTH; i = i + 1) begin
                 mem[i] <= 0;
             end
-        end else if (w) begin
-            mem[word_addr] <= id;
+        end else if (we) begin
+            mem[word_addr] <= wdata;
         end
     end
 endmodule

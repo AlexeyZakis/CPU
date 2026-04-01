@@ -12,7 +12,7 @@ localparam REG_COUNT = 8;
 
 localparam DMEM_DEPTH = 8;
 
-localparam IMEM_DEPTH = 16;
+localparam IMEM_DEPTH = 32;
 
 // Opcodes (MIPS-like)
 localparam OPC_RTYPE = 6'b000000;
@@ -28,6 +28,7 @@ localparam FUNCT_SUB = 6'b100010;
 localparam FUNCT_AND = 6'b100100;
 localparam FUNCT_OR = 6'b100101;
 localparam FUNCT_SLT = 6'b101010;
+localparam FUNCT_MUL = 6'b011000;
 
 // ISA field widths
 localparam ISA_OPC_W = 6;
@@ -71,6 +72,17 @@ localparam ALU_SUB = 2;
 localparam ALU_AND = 3;
 localparam ALU_OR = 4;
 localparam ALU_SLT = 5;
+localparam ALU_MUL = 6;
+
+// Mul states
+localparam [1:0] MUL_STATE_IDLE = 2'b00;
+localparam [1:0] MUL_STATE_RUN = 2'b01;
+localparam [1:0] MUL_STATE_COMMIT = 2'b10;
+
+// Forward selectors
+localparam [1:0] FWD_SEL_REG = 2'b00;
+localparam [1:0] FWD_SEL_EX_MEM = 2'b01;
+localparam [1:0] FWD_SEL_WB = 2'b10;
 
 
 // Pre-calculated constants
@@ -80,6 +92,8 @@ localparam IMEM_ADDR_W = $clog2(IMEM_DEPTH);
 
 localparam WORD_BYTES = DATA_W / BYTE_W;
 localparam BYTE_OFFSET_W = $clog2(WORD_BYTES);
+
+localparam MUL_CNT_W = $clog2(DATA_W + 1);
 
 endpackage
 
