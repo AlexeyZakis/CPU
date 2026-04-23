@@ -3,6 +3,7 @@ import cpu_defs::*;
 module ex_mem_reg (
     input wire clk,
     input wire rst,
+    input wire stall,
     input wire [DATA_W-1:0] alu_out_in,
     input wire [DATA_W-1:0] rt_fwd_in,
     input wire [REG_ADDR_W-1:0] dest_in,
@@ -30,7 +31,7 @@ module ex_mem_reg (
             mem_write_out <= 1'b0;
             mem_read_out <= 1'b0;
             mem_to_reg_out <= 1'b0;
-        end else begin
+        end else if (!stall) begin
             alu_out_out <= alu_out_in;
             rt_fwd_out <= rt_fwd_in;
             dest_out <= dest_in;

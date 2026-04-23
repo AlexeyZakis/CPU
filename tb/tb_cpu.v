@@ -22,7 +22,7 @@ module tb_cpu;
         #2;
         rst = 1'b0;
 
-        #200;
+        #300;
         $finish;
     end
 

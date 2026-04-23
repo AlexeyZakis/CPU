@@ -5,10 +5,13 @@ module core_pipeline (
     input wire rst,
     output wire [ADDR_W-1:0] imem_addr,
     input wire [INSTR_W-1:0] imem_data,
-    output wire dmem_we,
-    output wire [ADDR_W-1:0] dmem_addr,
-    output wire [DATA_W-1:0] dmem_wdata,
-    input wire [DATA_W-1:0] dmem_rdata
+    output wire dcache_req_valid,
+    input wire dcache_req_ready,
+    output wire dcache_req_write,
+    output wire [ADDR_W-1:0] dcache_req_addr,
+    output wire [DATA_W-1:0] dcache_req_wdata,
+    input wire dcache_resp_valid,
+    input wire [DATA_W-1:0] dcache_resp_rdata
 );
     wire [ADDR_W-1:0] pc;
     wire [ADDR_W-1:0] pc_next_seq;
@@ -86,6 +89,7 @@ module core_pipeline (
     wire stall_id;
     wire flush_id_ex;
     wire ex_busy;
+    wire mem_stall;
     wire [1:0] fwd_a_sel;
     wire [1:0] fwd_b_sel;
     wire ex_redirect;
@@ -100,6 +104,13 @@ module core_pipeline (
     wire ex_mem_to_reg;
     wire [ADDR_W-1:0] ex_pc_target;
 
+    wire [DATA_W-1:0] mem_stage_alu_out;
+    wire [DATA_W-1:0] mem_stage_mem_data;
+    wire [REG_ADDR_W-1:0] mem_stage_dest;
+    wire mem_stage_valid;
+    wire mem_stage_reg_write;
+    wire mem_stage_mem_to_reg;
+
     assign pc_next_seq = pc + WORD_BYTES;
     assign pc_next = ex_redirect ? ex_redirect_target : pc_next_seq;
     assign pc_store = ex_redirect || !stall_if;
@@ -110,10 +121,6 @@ module core_pipeline (
     assign id_rt_idx = id_rt[REG_ADDR_W-1:0];
     assign id_rd_idx = id_rd[REG_ADDR_W-1:0];
     assign id_dest_idx = id_reg_dst ? id_rd_idx : id_rt_idx;
-
-    assign dmem_we = ex_mem_valid && ex_mem_mem_write;
-    assign dmem_addr = ex_mem_alu_out;
-    assign dmem_wdata = ex_mem_rt_fwd;
 
     pc_reg u_pc_reg (
         .clk(clk),
@@ -186,7 +193,7 @@ module core_pipeline (
         .if_id_rs(id_rs_idx),
         .if_id_rt(id_rt_idx),
         .ex_busy(ex_busy),
-        .mem_stall(1'b0),
+        .mem_stall(mem_stall),
         .stall_if(stall_if),
         .stall_id(stall_id),
         .flush_id_ex(flush_id_ex)
@@ -288,6 +295,7 @@ module core_pipeline (
     ex_mem_reg u_ex_mem_reg (
         .clk(clk),
         .rst(rst),
+        .stall(mem_stall),
         .alu_out_in(ex_alu_result),
         .rt_fwd_in(ex_rt_fwd),
         .dest_in(ex_dest),
@@ -306,15 +314,42 @@ module core_pipeline (
         .mem_to_reg_out(ex_mem_mem_to_reg)
     );
 
-    mem_wb_reg u_mem_wb_reg (
+    mem_stage u_mem_stage (
         .clk(clk),
         .rst(rst),
         .alu_out_in(ex_mem_alu_out),
-        .mem_data_in(dmem_rdata),
+        .store_data_in(ex_mem_rt_fwd),
         .dest_in(ex_mem_dest),
         .valid_in(ex_mem_valid),
         .reg_write_in(ex_mem_reg_write),
+        .mem_write_in(ex_mem_mem_write),
+        .mem_read_in(ex_mem_mem_read),
         .mem_to_reg_in(ex_mem_mem_to_reg),
+        .cache_req_valid(dcache_req_valid),
+        .cache_req_ready(dcache_req_ready),
+        .cache_req_write(dcache_req_write),
+        .cache_req_addr(dcache_req_addr),
+        .cache_req_wdata(dcache_req_wdata),
+        .cache_resp_valid(dcache_resp_valid),
+        .cache_resp_rdata(dcache_resp_rdata),
+        .mem_stall(mem_stall),
+        .wb_alu_out(mem_stage_alu_out),
+        .wb_mem_data(mem_stage_mem_data),
+        .wb_dest(mem_stage_dest),
+        .wb_valid(mem_stage_valid),
+        .wb_reg_write(mem_stage_reg_write),
+        .wb_mem_to_reg(mem_stage_mem_to_reg)
+    );
+
+    mem_wb_reg u_mem_wb_reg (
+        .clk(clk),
+        .rst(rst),
+        .alu_out_in(mem_stage_alu_out),
+        .mem_data_in(mem_stage_mem_data),
+        .dest_in(mem_stage_dest),
+        .valid_in(mem_stage_valid),
+        .reg_write_in(mem_stage_reg_write),
+        .mem_to_reg_in(mem_stage_mem_to_reg),
         .alu_out_out(mem_wb_alu_out),
         .mem_data_out(mem_wb_mem_data),
         .dest_out(mem_wb_dest),

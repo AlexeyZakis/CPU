@@ -10,9 +10,16 @@ localparam BYTE_W = 8;
 
 localparam REG_COUNT = 8;
 
-localparam DMEM_DEPTH = 8;
+localparam DMEM_DEPTH = 128;
 
-localparam IMEM_DEPTH = 32;
+localparam IMEM_DEPTH = 64;
+
+localparam L1_BANKS = 2;
+localparam L1_WAYS = 2;
+localparam L1_SETS_PER_BANK = 2;
+localparam L1_LINE_WORDS = 4;
+localparam L2_SETS = 8;
+localparam WRITE_BUFFER_DEPTH = 4;
 
 // Opcodes (MIPS-like)
 localparam OPC_RTYPE = 6'b000000;
@@ -38,7 +45,7 @@ localparam ISA_FUNCT_W = 6;
 localparam ISA_IMM_W = 16;
 localparam ISA_JADDR_W = 26;
 
- // MIPS-like instruction field bit positions
+// MIPS-like instruction field bit positions
 localparam OPC_MSB = 31;
 localparam OPC_LSB = 26;
 
@@ -84,6 +91,11 @@ localparam [1:0] FWD_SEL_REG = 2'b00;
 localparam [1:0] FWD_SEL_EX_MEM = 2'b01;
 localparam [1:0] FWD_SEL_WB = 2'b10;
 
+// Cache refill states
+localparam [1:0] REFILL_IDLE = 2'b00;
+localparam [1:0] REFILL_LOOKUP = 2'b01;
+localparam [1:0] REFILL_WAIT_MEM = 2'b10;
+localparam [1:0] REFILL_COMMIT = 2'b11;
 
 // Pre-calculated constants
 localparam REG_ADDR_W = $clog2(REG_COUNT);
@@ -92,6 +104,13 @@ localparam IMEM_ADDR_W = $clog2(IMEM_DEPTH);
 
 localparam WORD_BYTES = DATA_W / BYTE_W;
 localparam BYTE_OFFSET_W = $clog2(WORD_BYTES);
+localparam LINE_WORD_IDX_W = $clog2(L1_LINE_WORDS);
+localparam L1_TOTAL_SET_W = $clog2(L1_TOTAL_SETS);
+localparam L1_TOTAL_SETS = L1_BANKS * L1_SETS_PER_BANK;
+localparam L1_BANK_W = $clog2(L1_BANKS);
+localparam L1_SET_W = $clog2(L1_SETS_PER_BANK);
+localparam L2_SET_W = $clog2(L2_SETS);
+localparam WRITE_BUFFER_PTR_W = $clog2(WRITE_BUFFER_DEPTH);
 
 localparam MUL_CNT_W = $clog2(DATA_W + 1);
 

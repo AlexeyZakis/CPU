@@ -1,2 +1,36 @@
+# Build artifacts
+/build/
+/out/
+/dist/
+
+# Simulation outputs
 *.vcd
-cpu_sim
+*.fst
+*.lxt
+*.lx2
+*.vvp
+
+# Compiler outputs
+*.o
+*.obj
+*.log
+
+# Waveform/session files
+# *.gtkw
+# *.sav
+
+# Temporary/editor files
+*~
+*.swp
+*.swo
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE directories
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
