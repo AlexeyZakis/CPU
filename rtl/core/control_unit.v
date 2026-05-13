@@ -12,6 +12,8 @@ module control_unit (
     output reg branch,
     output reg jump,
     output reg is_mul,
+    output reg vm_cmd_valid,
+    output reg [VM_OP_W-1:0] vm_cmd_op,
     output reg [ALU_OP_W-1:0] alu_op
 );
     always @(*) begin
@@ -24,6 +26,8 @@ module control_unit (
         branch = 1'b0;
         jump = 1'b0;
         is_mul = 1'b0;
+        vm_cmd_valid = 1'b0;
+        vm_cmd_op = VM_OP_NONE;
         alu_op = ALU_NOP;
 
         case (opcode)
@@ -70,8 +74,36 @@ module control_unit (
             OPC_J: begin
                 jump = 1'b1;
             end
+            OPC_VM_SEG_BASE: begin
+                vm_cmd_valid = 1'b1;
+                vm_cmd_op = VM_OP_SET_SEG_BASE;
+                alu_src = 1'b1;
+                alu_op = ALU_ADD;
+            end
+            OPC_VM_SEG_LIMIT: begin
+                vm_cmd_valid = 1'b1;
+                vm_cmd_op = VM_OP_SET_SEG_LIMIT;
+                alu_src = 1'b1;
+                alu_op = ALU_ADD;
+            end
+            OPC_VM_MAP_SMALL: begin
+                vm_cmd_valid = 1'b1;
+                vm_cmd_op = VM_OP_MAP_SMALL;
+                alu_src = 1'b1;
+                alu_op = ALU_ADD;
+            end
+            OPC_VM_MAP_LARGE: begin
+                vm_cmd_valid = 1'b1;
+                vm_cmd_op = VM_OP_MAP_LARGE;
+                alu_src = 1'b1;
+                alu_op = ALU_ADD;
+            end
+            OPC_VM_TLB_INV: begin
+                vm_cmd_valid = 1'b1;
+                vm_cmd_op = VM_OP_TLB_INV;
+                alu_op = ALU_NOP;
+            end
             default: begin end
         endcase
     end
 endmodule
-

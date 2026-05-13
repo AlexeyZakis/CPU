@@ -18,6 +18,8 @@ module ex_stage (
     input wire branch_in,
     input wire jump_in,
     input wire is_mul_in,
+    input wire vm_cmd_valid_in,
+    input wire [VM_OP_W-1:0] vm_cmd_op_in,
     input wire [ALU_OP_W-1:0] alu_op_in,
     input wire [1:0] fwd_a_sel,
     input wire [1:0] fwd_b_sel,
@@ -34,6 +36,8 @@ module ex_stage (
     output wire mem_write_out,
     output wire mem_read_out,
     output wire mem_to_reg_out,
+    output wire vm_cmd_valid_out,
+    output wire [VM_OP_W-1:0] vm_cmd_op_out,
     output wire [ADDR_W-1:0] pc_target_out
 );
     reg [DATA_W-1:0] src_a;
@@ -166,4 +170,6 @@ module ex_stage (
     assign mem_write_out = mul_commit ? 1'b0 : mem_write_in;
     assign mem_read_out = mul_commit ? 1'b0 : mem_read_in;
     assign mem_to_reg_out = mul_commit ? 1'b0 : mem_to_reg_in;
+    assign vm_cmd_valid_out = mul_commit ? 1'b0 : vm_cmd_valid_in;
+    assign vm_cmd_op_out = mul_commit ? VM_OP_NONE : vm_cmd_op_in;
 endmodule

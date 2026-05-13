@@ -14,6 +14,13 @@ module cpu (
     wire dcache_resp_valid;
     wire [DATA_W-1:0] dcache_resp_rdata;
 
+    wire vm_cmd_valid;
+    wire vm_cmd_ready;
+    wire [VM_OP_W-1:0] vm_cmd_op;
+    wire [ADDR_W-1:0] vm_cmd_arg0;
+    wire [ADDR_W-1:0] vm_cmd_arg1;
+    wire vm_cmd_resp_valid;
+
     core_pipeline u_core_pipeline (
         .clk(clk),
         .rst(rst),
@@ -25,7 +32,13 @@ module cpu (
         .dcache_req_addr(dcache_req_addr),
         .dcache_req_wdata(dcache_req_wdata),
         .dcache_resp_valid(dcache_resp_valid),
-        .dcache_resp_rdata(dcache_resp_rdata)
+        .dcache_resp_rdata(dcache_resp_rdata),
+        .vm_cmd_valid(vm_cmd_valid),
+        .vm_cmd_ready(vm_cmd_ready),
+        .vm_cmd_op(vm_cmd_op),
+        .vm_cmd_arg0(vm_cmd_arg0),
+        .vm_cmd_arg1(vm_cmd_arg1),
+        .vm_cmd_resp_valid(vm_cmd_resp_valid)
     );
 
     instr_mem u_instr_mem (
@@ -42,7 +55,12 @@ module cpu (
         .cpu_req_addr(dcache_req_addr),
         .cpu_req_wdata(dcache_req_wdata),
         .cpu_resp_valid(dcache_resp_valid),
-        .cpu_resp_rdata(dcache_resp_rdata)
+        .cpu_resp_rdata(dcache_resp_rdata),
+        .vm_cmd_valid(vm_cmd_valid),
+        .vm_cmd_ready(vm_cmd_ready),
+        .vm_cmd_op(vm_cmd_op),
+        .vm_cmd_arg0(vm_cmd_arg0),
+        .vm_cmd_arg1(vm_cmd_arg1),
+        .vm_cmd_resp_valid(vm_cmd_resp_valid)
     );
 endmodule
-

@@ -1,4 +1,5 @@
 # Build artifacts
+/result_builder/result/
 /build/
 /out/
 /dist/

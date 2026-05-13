@@ -11,7 +11,13 @@ module core_pipeline (
     output wire [ADDR_W-1:0] dcache_req_addr,
     output wire [DATA_W-1:0] dcache_req_wdata,
     input wire dcache_resp_valid,
-    input wire [DATA_W-1:0] dcache_resp_rdata
+    input wire [DATA_W-1:0] dcache_resp_rdata,
+    output wire vm_cmd_valid,
+    input wire vm_cmd_ready,
+    output wire [VM_OP_W-1:0] vm_cmd_op,
+    output wire [ADDR_W-1:0] vm_cmd_arg0,
+    output wire [ADDR_W-1:0] vm_cmd_arg1,
+    input wire vm_cmd_resp_valid
 );
     wire [ADDR_W-1:0] pc;
     wire [ADDR_W-1:0] pc_next_seq;
@@ -39,6 +45,8 @@ module core_pipeline (
     wire id_branch;
     wire id_jump;
     wire id_is_mul;
+    wire id_vm_cmd_valid;
+    wire [VM_OP_W-1:0] id_vm_cmd_op;
     wire [ALU_OP_W-1:0] id_alu_op;
     wire [DATA_W-1:0] id_rs_data;
     wire [DATA_W-1:0] id_rt_data;
@@ -66,6 +74,8 @@ module core_pipeline (
     wire id_ex_branch;
     wire id_ex_jump;
     wire id_ex_is_mul;
+    wire id_ex_vm_cmd_valid;
+    wire [VM_OP_W-1:0] id_ex_vm_cmd_op;
     wire [ALU_OP_W-1:0] id_ex_alu_op;
 
     wire [DATA_W-1:0] ex_mem_alu_out;
@@ -76,6 +86,8 @@ module core_pipeline (
     wire ex_mem_mem_write;
     wire ex_mem_mem_read;
     wire ex_mem_mem_to_reg;
+    wire ex_mem_vm_cmd_valid;
+    wire [VM_OP_W-1:0] ex_mem_vm_cmd_op;
 
     wire [DATA_W-1:0] mem_wb_alu_out;
     wire [DATA_W-1:0] mem_wb_mem_data;
@@ -102,6 +114,8 @@ module core_pipeline (
     wire ex_mem_write;
     wire ex_mem_read;
     wire ex_mem_to_reg;
+    wire ex_vm_cmd_valid;
+    wire [VM_OP_W-1:0] ex_vm_cmd_op;
     wire [ADDR_W-1:0] ex_pc_target;
 
     wire [DATA_W-1:0] mem_stage_alu_out;
@@ -167,6 +181,8 @@ module core_pipeline (
         .branch(id_branch),
         .jump(id_jump),
         .is_mul(id_is_mul),
+        .vm_cmd_valid(id_vm_cmd_valid),
+        .vm_cmd_op(id_vm_cmd_op),
         .alu_op(id_alu_op)
     );
 
@@ -222,6 +238,8 @@ module core_pipeline (
         .branch_in(id_branch),
         .jump_in(id_jump),
         .is_mul_in(id_is_mul),
+        .vm_cmd_valid_in(id_vm_cmd_valid),
+        .vm_cmd_op_in(id_vm_cmd_op),
         .alu_op_in(id_alu_op),
         .pc_out(id_ex_pc),
         .rs_data_out(id_ex_rs_data),
@@ -241,6 +259,8 @@ module core_pipeline (
         .branch_out(id_ex_branch),
         .jump_out(id_ex_jump),
         .is_mul_out(id_ex_is_mul),
+        .vm_cmd_valid_out(id_ex_vm_cmd_valid),
+        .vm_cmd_op_out(id_ex_vm_cmd_op),
         .alu_op_out(id_ex_alu_op)
     );
 
@@ -273,6 +293,8 @@ module core_pipeline (
         .branch_in(id_ex_branch),
         .jump_in(id_ex_jump),
         .is_mul_in(id_ex_is_mul),
+        .vm_cmd_valid_in(id_ex_vm_cmd_valid),
+        .vm_cmd_op_in(id_ex_vm_cmd_op),
         .alu_op_in(id_ex_alu_op),
         .fwd_a_sel(fwd_a_sel),
         .fwd_b_sel(fwd_b_sel),
@@ -289,6 +311,8 @@ module core_pipeline (
         .mem_write_out(ex_mem_write),
         .mem_read_out(ex_mem_read),
         .mem_to_reg_out(ex_mem_to_reg),
+        .vm_cmd_valid_out(ex_vm_cmd_valid),
+        .vm_cmd_op_out(ex_vm_cmd_op),
         .pc_target_out(ex_pc_target)
     );
 
@@ -304,6 +328,8 @@ module core_pipeline (
         .mem_write_in(ex_mem_write),
         .mem_read_in(ex_mem_read),
         .mem_to_reg_in(ex_mem_to_reg),
+        .vm_cmd_valid_in(ex_vm_cmd_valid),
+        .vm_cmd_op_in(ex_vm_cmd_op),
         .alu_out_out(ex_mem_alu_out),
         .rt_fwd_out(ex_mem_rt_fwd),
         .dest_out(ex_mem_dest),
@@ -311,7 +337,9 @@ module core_pipeline (
         .reg_write_out(ex_mem_reg_write),
         .mem_write_out(ex_mem_mem_write),
         .mem_read_out(ex_mem_mem_read),
-        .mem_to_reg_out(ex_mem_mem_to_reg)
+        .mem_to_reg_out(ex_mem_mem_to_reg),
+        .vm_cmd_valid_out(ex_mem_vm_cmd_valid),
+        .vm_cmd_op_out(ex_mem_vm_cmd_op)
     );
 
     mem_stage u_mem_stage (
@@ -325,6 +353,8 @@ module core_pipeline (
         .mem_write_in(ex_mem_mem_write),
         .mem_read_in(ex_mem_mem_read),
         .mem_to_reg_in(ex_mem_mem_to_reg),
+        .vm_cmd_valid_in(ex_mem_vm_cmd_valid),
+        .vm_cmd_op_in(ex_mem_vm_cmd_op),
         .cache_req_valid(dcache_req_valid),
         .cache_req_ready(dcache_req_ready),
         .cache_req_write(dcache_req_write),
@@ -332,6 +362,12 @@ module core_pipeline (
         .cache_req_wdata(dcache_req_wdata),
         .cache_resp_valid(dcache_resp_valid),
         .cache_resp_rdata(dcache_resp_rdata),
+        .vm_cmd_valid(vm_cmd_valid),
+        .vm_cmd_ready(vm_cmd_ready),
+        .vm_cmd_op(vm_cmd_op),
+        .vm_cmd_arg0(vm_cmd_arg0),
+        .vm_cmd_arg1(vm_cmd_arg1),
+        .vm_cmd_resp_valid(vm_cmd_resp_valid),
         .mem_stall(mem_stall),
         .wb_alu_out(mem_stage_alu_out),
         .wb_mem_data(mem_stage_mem_data),

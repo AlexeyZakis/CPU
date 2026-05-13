@@ -24,6 +24,15 @@ module data_mem (
     wire [DATA_W-1:0] dbg_mem5 = mem[5];
     wire [DATA_W-1:0] dbg_mem6 = mem[6];
     wire [DATA_W-1:0] dbg_mem7 = mem[7];
+    wire [DATA_W-1:0] dbg_mem8 = mem[8];
+    wire [DATA_W-1:0] dbg_mem9 = mem[9];
+    wire [DATA_W-1:0] dbg_mem10 = mem[10];
+    wire [DATA_W-1:0] dbg_mem16 = mem[16];
+    wire [DATA_W-1:0] dbg_mem17 = mem[17];
+    wire [DATA_W-1:0] dbg_mem24 = mem[24];
+    wire [DATA_W-1:0] dbg_mem25 = mem[25];
+    wire [DATA_W-1:0] dbg_mem26 = mem[26];
+    wire [DATA_W-1:0] dbg_mem27 = mem[27];
 
     assign req_ready = 1'b1;
     assign word_addr = addr[DMEM_ADDR_W + BYTE_OFFSET_W - 1 : BYTE_OFFSET_W];

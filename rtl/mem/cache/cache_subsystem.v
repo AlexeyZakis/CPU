@@ -9,7 +9,13 @@ module cache_subsystem (
     input wire [ADDR_W-1:0] cpu_req_addr,
     input wire [DATA_W-1:0] cpu_req_wdata,
     output reg cpu_resp_valid,
-    output reg [DATA_W-1:0] cpu_resp_rdata
+    output reg [DATA_W-1:0] cpu_resp_rdata,
+    input wire vm_cmd_valid,
+    output wire vm_cmd_ready,
+    input wire [VM_OP_W-1:0] vm_cmd_op,
+    input wire [ADDR_W-1:0] vm_cmd_arg0,
+    input wire [ADDR_W-1:0] vm_cmd_arg1,
+    output wire vm_cmd_resp_valid
 );
     localparam L1_TAG_W = ADDR_W - BYTE_OFFSET_W - LINE_WORD_IDX_W - L1_TOTAL_SET_W;
     localparam L2_TAG_W = ADDR_W - BYTE_OFFSET_W - LINE_WORD_IDX_W - L2_SET_W;
@@ -26,6 +32,7 @@ module cache_subsystem (
     reg pipe_valid;
     reg pipe_write;
     reg [ADDR_W-1:0] pipe_addr;
+    reg [ADDR_W-1:0] pipe_paddr;
     reg [DATA_W-1:0] pipe_wdata;
 
     reg miss_active;
@@ -68,6 +75,13 @@ module cache_subsystem (
     wire mem_resp_valid;
     wire [DATA_W-1:0] mem_resp_rdata;
 
+    wire [ADDR_W-1:0] incoming_paddr;
+    wire incoming_translate_ok;
+    wire incoming_translate_fault;
+    wire incoming_tlb_hit;
+    wire incoming_page_hit;
+    wire incoming_can_translate;
+
     integer stage_lookup_i;
     integer incoming_lookup_i;
 
@@ -90,6 +104,12 @@ module cache_subsystem (
     reg incoming_bank_r;
     reg [L1_SET_W-1:0] incoming_set_r;
     reg [L1_TAG_W-1:0] incoming_tag_r;
+
+    wire [DATA_W-1:0] dbg_l1_is_virtual = pipe_addr;
+    wire [DATA_W-1:0] dbg_l2_is_physical = pipe_paddr;
+    wire dbg_tlb_hit = incoming_tlb_hit;
+    wire dbg_page_walk_hit = incoming_page_hit;
+    wire dbg_translate_fault = incoming_translate_fault;
 
     function automatic [L1_BANK_W-1:0] get_bank;
         input [ADDR_W-1:0] addr;
@@ -168,8 +188,8 @@ module cache_subsystem (
         stage_set = get_bank_set(pipe_addr);
         stage_word = get_word_idx(pipe_addr);
         stage_tag = get_l1_tag(pipe_addr);
-        stage_l2_set = get_l2_set(pipe_addr);
-        stage_l2_tag = get_l2_tag(pipe_addr);
+        stage_l2_set = get_l2_set(pipe_paddr);
+        stage_l2_tag = get_l2_tag(pipe_paddr);
         stage_l2_hit = l2_valid[stage_l2_set] && (l2_tag[stage_l2_set] == stage_l2_tag);
         stage_replace_way = l1_lru[stage_bank][stage_set];
         if (!l1_valid[stage_bank][0][stage_set]) begin
@@ -200,7 +220,26 @@ module cache_subsystem (
 
     assign cpu_bank_busy = miss_active && (get_bank(cpu_req_addr) == miss_bank);
     assign incoming_hit = incoming_hit_r;
-    assign cpu_req_ready = !pipe_valid && (!cpu_req_write || !wb_full) && (!miss_active || (!cpu_bank_busy && incoming_hit));
+    assign incoming_can_translate = !cpu_req_valid || incoming_translate_ok;
+    assign cpu_req_ready = !pipe_valid && incoming_can_translate && (!cpu_req_write || !wb_full) && (!miss_active || (!cpu_bank_busy && incoming_hit));
+
+    mmu u_mmu (
+        .clk(clk),
+        .rst(rst),
+        .translate_valid(cpu_req_valid),
+        .translate_vaddr(cpu_req_addr),
+        .translate_ok(incoming_translate_ok),
+        .translate_fault(incoming_translate_fault),
+        .translate_tlb_hit(incoming_tlb_hit),
+        .translate_page_hit(incoming_page_hit),
+        .translate_paddr(incoming_paddr),
+        .cmd_valid(vm_cmd_valid),
+        .cmd_ready(vm_cmd_ready),
+        .cmd_op(vm_cmd_op),
+        .cmd_arg0(vm_cmd_arg0),
+        .cmd_arg1(vm_cmd_arg1),
+        .cmd_resp_valid(vm_cmd_resp_valid)
+    );
 
     write_buffer u_write_buffer (
         .clk(clk),
@@ -227,9 +266,9 @@ module cache_subsystem (
         .resp_valid(mem_resp_valid),
         .rdata(mem_resp_rdata)
     );
-    
+
     `include "cache_subsystem_seq_tasks.vh"
-    
+
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             reset_cache_state();
@@ -242,4 +281,3 @@ module cache_subsystem (
         end
     end
 endmodule
-

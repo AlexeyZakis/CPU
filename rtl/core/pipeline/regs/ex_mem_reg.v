@@ -12,6 +12,8 @@ module ex_mem_reg (
     input wire mem_write_in,
     input wire mem_read_in,
     input wire mem_to_reg_in,
+    input wire vm_cmd_valid_in,
+    input wire [VM_OP_W-1:0] vm_cmd_op_in,
     output reg [DATA_W-1:0] alu_out_out,
     output reg [DATA_W-1:0] rt_fwd_out,
     output reg [REG_ADDR_W-1:0] dest_out,
@@ -19,7 +21,9 @@ module ex_mem_reg (
     output reg reg_write_out,
     output reg mem_write_out,
     output reg mem_read_out,
-    output reg mem_to_reg_out
+    output reg mem_to_reg_out,
+    output reg vm_cmd_valid_out,
+    output reg [VM_OP_W-1:0] vm_cmd_op_out
 );
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -31,6 +35,8 @@ module ex_mem_reg (
             mem_write_out <= 1'b0;
             mem_read_out <= 1'b0;
             mem_to_reg_out <= 1'b0;
+            vm_cmd_valid_out <= 1'b0;
+            vm_cmd_op_out <= VM_OP_NONE;
         end else if (!stall) begin
             alu_out_out <= alu_out_in;
             rt_fwd_out <= rt_fwd_in;
@@ -40,7 +46,8 @@ module ex_mem_reg (
             mem_write_out <= mem_write_in;
             mem_read_out <= mem_read_in;
             mem_to_reg_out <= mem_to_reg_in;
+            vm_cmd_valid_out <= vm_cmd_valid_in;
+            vm_cmd_op_out <= vm_cmd_op_in;
         end
     end
 endmodule
-
