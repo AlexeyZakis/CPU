@@ -7,5 +7,5 @@
 <p align="center"> <img src="https://github.com/AlexeyZakis/Cpu/blob/main/img/test_part_2.png" alt="Test part 2"> </p>
 
 <h3 align="center">Test result</h3>
-[Open result](https://github.com/AlexeyZakis/Cpu/blob/main/img/test_result.pdf)
+[Open result](https://github.com/AlexeyZakis/CPU/blob/main/result/test_result.pdf)
 
