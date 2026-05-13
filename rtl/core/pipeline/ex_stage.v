@@ -173,3 +173,4 @@ module ex_stage (
     assign vm_cmd_valid_out = mul_commit ? 1'b0 : vm_cmd_valid_in;
     assign vm_cmd_op_out = mul_commit ? VM_OP_NONE : vm_cmd_op_in;
 endmodule
+

@@ -131,3 +131,4 @@ localparam SMALL_PAGE_OFFSET_W = BYTE_OFFSET_W + $clog2(SMALL_PAGE_WORDS);
 localparam LARGE_PAGE_OFFSET_W = BYTE_OFFSET_W + $clog2(LARGE_PAGE_WORDS);
 
 endpackage
+

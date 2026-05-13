@@ -118,3 +118,4 @@ module instr_mem (
 
     assign rdata = mem[addr[IMEM_ADDR_W + BYTE_OFFSET_W - 1 : BYTE_OFFSET_W]];
 endmodule
+

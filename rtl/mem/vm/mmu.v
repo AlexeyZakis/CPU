@@ -186,10 +186,7 @@ module mmu (
             endcase
         end
     end
-
-    // Debug wires for GTKWave. Some simulators do not expose unpacked
-    // arrays as ordinary signals, so the important page table entries are
-    // mirrored as simple scalar/vector wires.
+    
     wire dbg_l1_valid_0 = l1_valid[0];
     wire dbg_l1_valid_1 = l1_valid[1];
     wire dbg_l1_valid_2 = l1_valid[2];
@@ -226,3 +223,4 @@ module mmu (
     wire [ADDR_W-1:0] dbg_pte_1_2_pbase = pte_pbase[1][2];
 
 endmodule
+

@@ -84,9 +84,6 @@ module tlb (
         end
     end
 
-    // Debug wires for GTKWave. Some simulators do not expose unpacked
-    // arrays as ordinary signals, so TLB entries are mirrored as simple
-    // scalar/vector wires.
     wire dbg_entry_0_valid = entry_valid[0];
     wire [ADDR_W-1:0] dbg_entry_0_vbase = entry_vbase[0];
     wire [ADDR_W-1:0] dbg_entry_0_pbase = entry_pbase[0];
@@ -108,3 +105,4 @@ module tlb (
     wire dbg_entry_3_size = entry_size[3];
 
 endmodule
+
